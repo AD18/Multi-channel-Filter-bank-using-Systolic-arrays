@@ -1,141 +1,35 @@
-# Multi-channel-Filter-bank-using-Systolic-arrays
-
-
-## 🔹 Introduction
-This project implements a **Finite Impulse Response (FIR) Filter** using a **systolic array architecture**. FIR filters are widely used in digital signal processing (DSP) for applications such as audio enhancement, communication systems, biomedical signals, and more. Traditional FIR implementations often rely on direct-form architectures, which suffer from large propagation delays and inefficient hardware usage.  
-
-By contrast, **systolic arrays** exploit parallelism and pipelining. They consist of interconnected processing elements (PEs) that work together in a rhythmic, "systolic" fashion—similar to the pumping of blood in the human heart. This makes systolic arrays an excellent choice for high-performance and scalable FIR filter implementations.
-
----
-
-## 🔹 Why Systolic Arrays?
-Traditional FIR filters compute outputs sequentially, requiring significant hardware resources for multipliers and adders while introducing long critical paths.  
-
-**Systolic arrays** address these limitations by:
-- Breaking down computations into smaller **processing elements (PEs)**.  
-- Enabling **local communication only between neighboring PEs** (no global buses).  
-- Supporting **parallelism**: multiple data samples flow simultaneously.  
-- Providing **regular, modular, and scalable hardware structure**.  
-- Reducing **latency and hardware complexity** compared to direct form.  
-
-As a result, systolic arrays are highly efficient in terms of **speed, throughput, and area optimization**.
-
----
-
-## 🔹 Project Overview
-In this work, we have:
-1. Designed and simulated an **FIR filter** using systolic array principles.  
-2. Built the **processing element (PE)** unit for multiply-accumulate (MAC) operations.  
-3. Constructed the **systolic array structure** by cascading PEs.  
-4. Verified functionality with test vectors.  
-5. Analyzed the **simulation results**, showing how the systolic array FIR filter performs compared to expectations.  
-
----
-
-## 🔹 Code Explanation (Colab Notebook Walkthrough)
-
-### 1. Importing Libraries
-The notebook begins with importing Python libraries such as:
-- **NumPy** – for mathematical operations.  
-- **Matplotlib** – for plotting results.  
-These are used for data generation, simulation, and visualization of the FIR filter.
-
----
-
-### 2. FIR Filter Fundamentals
-We define the FIR filter equation:
-
-\[
-y[n] = \sum_{k=0}^{N-1} h[k] \cdot x[n-k]
-\]
-
-- `x[n]` → input sequence.  
-- `h[k]` → filter coefficients.  
-- `y[n]` → filtered output.  
-
-This is the mathematical foundation for the systolic array implementation.
-
----
-
-### 3. Defining Processing Element (PE)
-Each **processing element** performs:
-- Multiplication: coefficient × input sample.  
-- Accumulation: adds the product to partial sums.  
-- Forwarding: passes data to the next PE.  
-
-The notebook defines this behavior step by step, showing how a single PE works in isolation.
-
----
-
-### 4. Building the Systolic Array
-- Multiple PEs are **connected in series**.  
-- Each PE receives:
-  - A coefficient from the FIR filter (`h[k]`).  
-  - An input data sample (shifted appropriately).  
-- Data flows rhythmically from one PE to the next, mimicking systolic movement.  
-
-The notebook shows code to:
-- Instantiate an array of PEs.  
-- Connect them for proper data flow.  
-- Ensure outputs propagate correctly at each clock cycle.
-
----
-
-### 5. Simulation with Input Data
-- Input test signals are generated (e.g., sine wave, step input).  
-- These signals are passed through the systolic array FIR filter.  
-- Outputs are collected at each time step.  
-
-This section validates the filter’s correctness against the theoretical FIR equation.
-
----
-
-### 6. Visualization of Results
-Using **Matplotlib plots**:
-- Input vs. Output signals are shown.  
-- The filtered signal demonstrates expected FIR characteristics:  
-  - Smoothing of noise.  
-  - Attenuation of unwanted frequencies.  
-  - Retention of desired signal components.  
-
-This confirms that the systolic array FIR filter works correctly.
-
----
-
-## 🔹 Results
-The results demonstrate that:
-- The systolic array produces the **same output as a conventional FIR filter**.  
-- However, the computation is **more efficient** due to parallel MAC operations.  
-- The modular PE design makes the filter **scalable for higher-order FIR filters** without major redesign.  
-
-Key Observations:
-- **Accuracy**: Outputs match expected FIR behavior.  
-- **Efficiency**: Reduced latency compared to traditional direct-form filters.  
-- **Scalability**: Easy extension by adding more PEs.  
-
----
-
-## 🔹 Conclusion
-This project successfully demonstrates the **implementation of an FIR filter using a systolic array**.  
-We showed:
-- Why systolic arrays are better than traditional FIR implementations.  
-- How the systolic array was built from modular processing elements.  
-- Verified the correctness of outputs using test signals and visualization.  
-
-The systolic array FIR filter proves to be a **highly efficient, scalable, and practical hardware-friendly solution** for modern digital signal processing applications.
-
----
-# Systolic Array FIR Filter — README
+# Multi channel Filter bank using Systolic arrays
 
 ## Project brief
 
-This project implements a **FIR filter bank** using a **systolic-array style architecture** implemented in Verilog and exercised on Colab using Icarus Verilog (`iverilog`) and Python-based verification/visualization. The goal is to show a hardware-friendly FIR bank design (many parallel FIR filters) built from a small, reusable **processing element (PE)** and to verify its correctness against a floating-point Python reference.
+This project implements a **FIR filter bank** using a **systolic-array style architecture** implemented in Verilog and exercised on Colab using Icarus Verilog (`iverilog`) and Python-based verification/visualization. The goal is to show a hardware-friendly FIR bank design (many parallel FIR filters) built from a small, reusable **processing element (PE)** and to verify its correctness against a floating-point Python reference. FIR filters are widely used in digital signal processing (DSP) for applications such as audio enhancement, communication systems, biomedical signals, and more. Traditional FIR implementations often rely on direct-form architectures, which suffer from large propagation delays and inefficient hardware usage. By contrast, **systolic arrays** exploit parallelism and pipelining. They consist of interconnected processing elements (PEs) that work together in a rhythmic, "systolic" fashion similar to the pumping of blood in the human heart. This makes systolic arrays an excellent choice for high-performance and scalable FIR filter implementations.
+
+## FIR Filter Formula
+
+The output of an FIR filter is defined as:
+
+$y[n] = \sum_{k=0}^{N-1} h[k] \cdot x[n-k]$
+
+Where:
+
+* **y\[n]** → Output signal at time step *n*
+* **x\[n]** → Input signal at time step *n*
+* **h\[k]** → Filter coefficients (impulse response of the system)
+* **N** → Number of filter taps (order of the FIR filter)
+
+### Explanation:
+
+* Each output $y[n]$ is a **weighted sum** of the current input and the past $N-1$ inputs.
+* The coefficients $h[k]$ determine the filter’s behavior (low-pass, high-pass, band-pass, etc.).
+* FIR filters are inherently **stable** (since they use no feedback) and have a **linear phase response**, making them suitable for many DSP applications.
+
+---
 
 **What we built**
 
 * A single PE (`block`) that performs a multiply and forwards the input sample to its neighbor (systolic behavior).
 * A `systolic_array` Verilog module that chains `NUM_TAPS` PEs to form one FIR filter (multiply + accumulation implemented across the chain).
-* A `topmodule` that instantiates `NUM_FILTERS` independent systolic chains in parallel — this is the FIR *bank*.
+* A `topmodule` that instantiates `NUM_FILTERS` independent systolic chains in parallel; this is the FIR *bank*.
 * A Verilog testbench that feeds fixed-point input samples and filter coefficients (generated in Python) and writes per-cycle outputs to `output.txt`.
 * Python tools (in the notebook) to generate inputs/coefficients, run the simulator, read results, compute the floating-point reference with `np.convolve`, and visualize/compare results.
 
@@ -145,19 +39,73 @@ This project implements a **FIR filter bank** using a **systolic-array style arc
 
 ## Why systolic arrays for FIR filters?
 
-**Problems with naive / direct-form FIR in hardware**
+### Traditional Approach:
 
-* A direct-form FIR implementation with `N` taps commonly needs `N` multipliers and `N-1` adders on the critical path if implemented combinationally — leads to long combinational paths and slow clocking.
+* A direct-form FIR implementation with `N` taps commonly needs `N` multipliers and `N-1` adders on the critical path if implemented combinationally, leading to long combinational paths and slow clocking.
 * If you time-multiplex hardware to reuse one multiplier/adder, you increase latency and lower throughput.
 
-**Systolic array advantages**
+In a direct implementation, each new output requires:
+* Multiplying each input sample with its corresponding coefficient.
+* Accumulating all partial sums.
 
-* Breaks computation into identical **processing elements (PEs)** that communicate only with immediate neighbors — no global buses.
+This approach works but can become inefficient for large $N$, as it requires multiple sequential multiplications and additions.
+
+### Systolic Array Implementation:
+
+Our project instead uses a **systolic array** structure to implement the FIR filter. Here’s how it works:
+
+* The filter is built from a chain of **processing elements (PEs)**.
+* Each PE performs a **multiply-and-accumulate (MAC)** operation on part of the input data and coefficient.
+* Data (input samples and coefficients) are **pipelined** through the array, enabling multiple operations to execute in parallel.
+* The result is that after the pipeline is filled, the filter produces a new output on every clock cycle.
+* Thereby reducing **latency and hardware complexity** compared to direct form.  
+
+This systolic design makes the FIR filter **highly parallel** and **throughput-efficient**, especially in hardware implementations like FPGAs or ASICs.
+
+### Advantages in Our Implementation:
+
+* Breaks computation into identical **processing elements (PEs)** that communicate only with immediate neighbors , i.e, no global buses.
 * Natural pipelining: new samples flow in every cycle and partial results flow through the array, enabling a new output every cycle after the pipeline fills.
-* Regular structure — easy to scale (increase taps or number of parallel filters by adding PEs/modules).
+* Regular structure: easy to scale (increase taps or number of parallel filters by adding PEs/modules).
 * Good area/time tradeoff: hardware resources are used continuously rather than idling.
 
 In short: systolic arrays are hardware-friendly, highly regular, and yield high throughput with low-frequency critical paths.
+
+---
+
+## Brief Project Overview
+
+This section provides a complete overview of the entire project, presenting the full workflow and flow of execution step by step:
+
+1. **Setup**  
+   We begin by installing **Icarus Verilog** on Colab to allow simulation of Verilog hardware code within the notebook environment.
+
+2. **Input & Coefficient Generation**  
+   Python scripts generate input samples (e.g., sinusoids) and FIR filter coefficients (`scipy.signal.firwin`).  
+   - Before quantization, values are **scaled properly** to avoid underflow, since without scaling many values would collapse to zero.  
+   - After scaling, they are quantized into **hexadecimal fixed-point numbers** and written to files:  
+     * `input_samples.mem` → one line per sample  
+     * `filter_coeffs.mem` → `(NUM_FILTERS × NUM_TAPS)` lines, one line per coefficient  
+
+3. **Defines File (`defines.vh`)**  
+   A key feature is that we define parameters like `NUM_TAPS`, `NUM_SAMPLES`, and `NUM_FILTERS` in a single header file `defines.vh`. These values automatically propagate to all other Verilog modules, making the design modular and scalable. By changing values in one place, the entire project adapts.
+
+4. **Verilog FIR Filter (Systolic Array)**  
+   Verilog modules implement the FIR filter as a systolic array.  
+   - The testbench reads the `.mem` files, processes them through the systolic FIR architecture, and writes the results to an output file.  
+   - The **output file (`output.txt`)** contains `(NUM_SAMPLES + NUM_TAPS – 1)` rows × `NUM_FILTERS` columns. The extra `(NUM_TAPS – 1)` rows account for convolution padding.  
+   - Each entry is written as a **signed integer** (two’s complement), representing the quantized convolution result.
+
+5. **Simulation & Verification (with Visualization)**  
+   Using the same input and coefficients, Python computes reference FIR results with `np.convolve`.  
+   - These results are compared line by line with Verilog’s `output.txt`.  
+   - Graphs of impulse responses, frequency responses, and time-domain outputs confirm that the Verilog and Python results match closely, apart from negligible quantization error.
+
+6. **Evolution of the Project**  
+   Initially, the project was built manually for **3 filters × 3 taps** in a brute-force style. Now, the design is fully modular and scalable, capable of handling arbitrary numbers of taps, samples, and filters. By simply changing parameters in `defines.vh`, it works seamlessly for *x* taps, *y* filters, and *z* samples.
+
+**In summary**:  
+The project generates scaled inputs and coefficients (stored as hex), defines parameters centrally in `defines.vh`, runs a systolic-array FIR in Verilog, writes signed integer results to `output.txt`, and verifies them against Python with simulation and visualization. The final design is **accurate, modular, scalable, and efficient**.
 
 ---
 
@@ -188,21 +136,21 @@ This Python section generates the stimuli that the Verilog testbench consumes. K
 
 * **Adjustable parameters** (variables at the top of the cell):
 
-  * `NUM_FILTERS` — how many independent FIR filters in the bank (e.g., 15).
-  * `NUM_TAPS` — number of taps (filter order), e.g., 15.
-  * `NUM_SAMPLES` — number of input samples to generate, e.g., 100.
-  * `Fs` — sampling frequency (used to design filters with particular cutoff frequencies).
-  * `scale` — scaling factor used to convert floating-point coefficients and samples into fixed-point 32-bit integers. In the notebook `scale = 32768` (i.e. 2^15, a Q15-like scaling), then stored as 32-bit signed values.
+  * `NUM_FILTERS` : how many independent FIR filters in the bank (e.g., 15).
+  * `NUM_TAPS` : number of taps (filter order), e.g., 15.
+  * `NUM_SAMPLES` : number of input samples to generate, e.g., 100.
+  * `Fs` : sampling frequency (used to design filters with particular cutoff frequencies).
+  * `scale` : scaling factor used to convert floating-point coefficients and samples into fixed-point 32-bit integers. In the notebook `scale = 32768` (i.e. 2^15, a Q15-like scaling), then stored as 32-bit signed values.
 
-* **Input signal**: the notebook creates a test signal that is the sum of several sinusoidal tones spread across the band — for example 100 Hz, 400 Hz, 700 Hz and 1000 Hz — so different filters in the bank (with different cutoffs) selectively attenuate/pass these tones.
+* **Input signal**: the notebook creates a test signal that is the sum of several sinusoidal tones spread across the band, for example 100 Hz, 400 Hz, 700 Hz and 1000 Hz, so different filters in the bank (with different cutoffs) selectively attenuate/pass these tones.
 
 * **Filters**: it uses `scipy.signal.firwin` to design `NUM_FILTERS` distinct FIR filters whose cutoff frequencies are spaced across the band. Each filter is a lowpass with a different cutoff (Hamming window used).
 
 * **Fixed-point conversion**: coefficients (`h`) and the input samples `x` are multiplied by `scale`, rounded, and stored as signed 32-bit integers. These are written to memory files for Verilog using `$readmemh`-style hex format:
 
-  * `input_samples.mem` — hex lines for each input sample (32-bit hex per line)
-  * `filter_coeffs.mem` — hex lines for all coefficients flattened (NUM\_FILTERS \* NUM\_TAPS lines)
-  * `defines.vh` — a small Verilog header containing `` `define NUM_FILTERS ... `` etc.
+  * `input_samples.mem` : hex lines for each input sample (32-bit hex per line)
+  * `filter_coeffs.mem` : hex lines for all coefficients flattened (NUM\_FILTERS \* NUM\_TAPS lines)
+  * `defines.vh` : a small Verilog header containing `` `define NUM_FILTERS ... `` etc.
 
 **Why this matters**: the Verilog implementation uses fixed-width integers; therefore we must carefully quantize inputs and coefficients the same way in Python to compute a comparable reference.
 
@@ -212,7 +160,7 @@ This Python section generates the stimuli that the Verilog testbench consumes. K
 
 This is the hardware heart of the project. The notebook writes several Verilog files by constructing lists of strings and dumping them to files. The important Verilog modules are:
 
-#### `block` — the processing element (PE)
+#### `block` : the processing element (PE)
 
 ```verilog
 module block(
@@ -247,7 +195,7 @@ endmodule
 
 **Design choice**: splitting multiply and accumulation makes each PE simple and lets a surrounding module (the chain aggregator) perform accumulation cleanly.
 
-#### `systolic_array` — one FIR filter built as a chain of `block` PEs
+#### `systolic_array` : one FIR filter built as a chain of `block` PEs
 
 Key portions (simplified):
 
@@ -290,11 +238,11 @@ endmodule
 
 This structure implements the multiply-and-accumulate of an FIR, with each multiply performed in a PE and the addition performed by collecting all products and summing them.
 
-#### `topmodule` — parallel FIR bank
+#### `topmodule` : parallel FIR bank
 
 `topmodule` instantiates `NUM_FILTERS` copies of `systolic_array`. Each copy receives its subset of flattened coefficients (`coeffs_this_filter`) pulled from a large `coeffs_flat_bus` and shares the same streaming input `inp_west`. Each filter produces a 72-bit `y_this` output and the top module flattens them into `y_out_flat`.
 
-**Why this is powerful**: you can run many independent FIRs on the same input stream in parallel — perfect for filter banks.
+**Why this is powerful**: we can run many independent FIRs on the same input stream in parallel, perfect for filter banks.
 
 #### `testbench`
 
@@ -344,7 +292,7 @@ def hex_to_signed(val, bits=32):
 **What the simulator visualizes**:
 
 * Filter taps (tap index vs coefficient magnitude). These show the impulse response of each filter and (usually) reveal symmetry (linear phase).
-* Frequency response (magnitude in dB) of each filter (via an FFT or via `scipy.signal.freqz` on the float coefficients) — shows the passband and stopband.
+* Frequency response (magnitude in dB) of each filter (via an FFT or via `scipy.signal.freqz` on the float coefficients) which shows the passband and stopband.
 * Time-domain outputs for Python vs Verilog for selected filters.
 
 > See the `Output Verifier` section below for the code that performs the reference convolution and the comparison.
@@ -356,7 +304,7 @@ def hex_to_signed(val, bits=32):
 This section is the python reference and validator. It does the following, step-by-step:
 
 1. **Load constants** from `defines.vh`.
-2. **Load input samples** (from `input_samples.mem`) and **filter coefficients** (from `filter_coeffs.mem`) and convert hex → signed integers.
+2. **Load input samples** (from `input_samples.mem`) and **filter coefficients** (from `filter_coeffs.mem`) and convert hex to signed integers.
 3. **Compute software reference outputs** (floating or high-precision integer) using `np.convolve(samples, filt, mode='full')` for each filter. This yields `expected_outputs` shaped `(TOTAL, NUM_FILTERS)` where `TOTAL = NUM_SAMPLES + NUM_TAPS - 1`.
 4. **Load Verilog outputs** with `np.loadtxt(output_file, dtype=np.int64)` producing `verilog_outputs` with the same shape.
 5. **Compute difference**:
@@ -369,7 +317,7 @@ diff = expected_outputs - verilog_outputs
 
 7. **Plotting & interactive checks**:
 
-* `plot_overlay_group(start_index=0)` — overlays the Python expected output and the Verilog output for the selected group of filters (typically five filters at a time). The plotting uses different linestyles so that you can visually compare.
+* `plot_overlay_group(start_index=0)` : overlays the Python expected output and the Verilog output for the selected group of filters (typically five filters at a time). The plotting uses different linestyles so that you can visually compare.
 
 * **Heatmap of differences**: The notebook creates a heatmap `imshow(diff.T, ...)` where x axis is time index (row/cycle), y axis is filter index. The color shows `Python - Verilog` difference value.
 
@@ -377,9 +325,9 @@ diff = expected_outputs - verilog_outputs
 
 ---
 
-## Results — What the graphs show and how to interpret them
+## Result graphs : What the graphs show and how to interpret them
 
-Below I walk through each type of plot the notebook generates and what you should look for.
+This is a walk through of each type of plot the notebook generates and what to look for.
 
 ### A) Coefficients (tap plots)
 
@@ -388,7 +336,7 @@ Below I walk through each type of plot the notebook generates and what you shoul
 **How to read it**:
 
 * **Symmetry**: many FIR design functions (including `firwin`) produce linear-phase filters, meaning coefficients are symmetric: `h[k] == h[N-1-k]`. You should see mirror symmetry around the center tap.
-* **Windowing**: because a Hamming window is used, coefficients smoothly taper near the ends — no abrupt truncation.
+* **Windowing**: because a Hamming window is used, coefficients smoothly taper near the ends and thus no abrupt truncation.
 * **Energy**: larger central coefficient magnitude indicates a sharper impulse response.
 
 **Why useful**: visually confirms correct coefficient generation and fixed-point scaling.
@@ -403,18 +351,18 @@ Below I walk through each type of plot the notebook generates and what you shoul
 * **Stopband**: frequencies above the cutoff should show strong attenuation (large negative dB values). The depth and slope tell you how selective the filter is.
 * **Cutoff shift**: quantization of coefficients causes slight changes in actual cutoff and stopband attenuation compared to the floating-point design.
 
-**What you should expect** given the generator: since the notebook creates a *bank* with cutoffs spread across the band, the frequency response plots for the sequence of filters will show cutoffs gradually moving from low frequency (only 100 Hz tone passes) up to high frequency (many tones pass).
+**What we should expect** given the generator: since the notebook creates a *bank* with cutoffs spread across the band, the frequency response plots for the sequence of filters will show cutoffs gradually moving from low frequency (only 100 Hz tone passes) up to high frequency (many tones pass).
 
 **Why useful**: confirms each filter implements the intended frequency behavior.
 
-### C) Time-domain outputs — Python vs Verilog overlay
+### C) Time-domain outputs : Python vs Verilog overlay
 
 **What is plotted**: for a selected filter index, two series are plotted against time: the Python `np.convolve` expected output and the Verilog `y_out` from the simulation.
 
 **How to read it**:
 
 * If the Verilog implementation is **functionally correct** and quantization matches the Python scaling, the two curves should *overlap* almost exactly (differences usually only in integer rounding effects).
-* **Transient region**: the first `NUM_TAPS-1` samples are transient (convolution not yet full). Expect partial sums during those steps — this is normal and identical in both implementations.
+* **Transient region**: the first `NUM_TAPS-1` samples are transient (convolution not yet full). Expect partial sums during those steps which is normal and identical in both implementations.
 * **Differences**: small step-level differences are typically due to integer quantization of coefficients and inputs. Larger discrepancies indicate a bug in data alignment, sign-extension, or bus width.
 
 **What to inspect**:
@@ -430,7 +378,7 @@ Below I walk through each type of plot the notebook generates and what you shoul
 
 * **All zeros (or near zeros)**: indicates bit-accurate match between the Python integer reference and Verilog outputs.
 * **Striping on edges**: expected transient differences near start/end of convolution appear as rows/columns with changes; they are not necessarily errors.
-* **Localized spots**: a single bright pixel indicates one sample/filter mismatch — inspect the printed example mismatch to see what happened.
+* **Localized spots**: a single bright pixel indicates one sample/filter mismatch. We can inspect the printed example mismatch to see what happened.
 
 **Why useful**: quickly shows whether mismatches are systematic (affect many filters/time steps) vs rare.
 
@@ -440,34 +388,51 @@ Often the notebook offers group views (five filters per page). Use that to see h
 
 **Interpretation**:
 
-* You should see the 100 Hz tone present/absent across filters according to cutoff.
+* We should see the 100 Hz tone present/absent across filters according to cutoff.
 * Visual correlation between frequency response and time-domain attenuation of tones: if a tone lies in the stopband, its amplitude in the output time-series will be suppressed.
 
 ---
 
-## Typical issues you might observe & debugging tips
+## Typical issues we might observe & debugging tips
 
-* **Large mismatches**: check sign extension when accumulating products. In our code the designer explicitly sign-extends each 64-bit product to 72 bits before summing:
+* **Large mismatches**: We should check sign extension when accumulating products. In our code the designer explicitly sign-extends each 64-bit product to 72 bits before summing:
 
   ```verilog
   sum = sum + {{8{result_bus[(k+1)*64-1]}}, result_bus[(k+1)*64-1 -: 64]};
   ```
 
-  If you forget the sign extension or choose too few extension bits, you can see errors for negative values or overflow.
+  If we forget the sign extension or choose too few extension bits, we can see errors for negative values or overflow.
 
-* **Wrong alignment / time shift**: verify that the testbench shifts samples into the systolic chain exactly as the Python convolution assumes (i.e., sample timing relative to when the result is sampled). The testbench writes `TOTAL = NUM_SAMPLES + NUM_TAPS - 1` rows — check that indexing is consistent.
+* **Wrong alignment / time shift**: we need to verify that the testbench shifts samples into the systolic chain exactly as the Python convolution assumes (i.e., sample timing relative to when the result is sampled). The testbench writes `TOTAL = NUM_SAMPLES + NUM_TAPS - 1` rows so we need to check if indexing is consistent.
 
-* **Quantization / scaling errors**: make sure the same `scale` is used in both the Python generator and when interpreting results in Python. Off-by-one in scale (e.g., 2^15 vs 2^16) yields visible amplitude differences.
+* **Quantization / scaling errors**: we need to make sure the same `scale` is used in both the Python generator and when interpreting results in Python. Off-by-one in scale (e.g., 2^15 vs 2^16) yields visible amplitude differences.
+
+---
+
+## 🔹 Results
+The results demonstrate that:
+- The systolic array produces the **same output as a conventional FIR filter**.  
+- However, the computation is **more efficient** due to parallel MAC operations.  
+- The modular PE design makes the filter **scalable for higher-order FIR filters** without major redesign.  
+
+Key Observations:
+- **Accuracy**: Outputs match expected FIR behavior.  
+- **Efficiency**: Reduced latency compared to traditional direct-form filters.  
+- **Scalability**: Easy extension by adding more PEs.  
 
 ---
 
 ## Conclusion and suggestions for improvements
+
+This project successfully demonstrates the **implementation of an FIR filter using a systolic array**.  
 
 **What we achieved**:
 
 * Implemented a compact systolic-array FIR filter bank in Verilog, parameterized by number of filters and taps.
 * Verified the design with an automated flow (Python generates data, Verilog sim runs, Python verifies & visualizes).
 * Demonstrated that systolic arrays give an elegant and scalable means to implement high-throughput FIR banks.
+
+The systolic array FIR filter proves to be a **highly efficient, scalable, and practical hardware-friendly solution** for modern digital signal processing applications.
 
 **Possible next steps / improvements**:
 
@@ -477,12 +442,3 @@ Often the notebook offers group views (five filters per page). Use that to see h
 * Replace the simple adder accumulation with a tree-adder or pipelined adder network if deeper tap counts are used and timing becomes tight.
 
 ---
-
-If you want, I can also:
-
-* attach selected **code snippets** verbatim (I included the most important ones above),
-* generate a cleaned `README.md` in your repo layout (or push a Gist), or
-* generate a short troubleshooting checklist for common mismatch patterns.
-
-Tell me which one you prefer next.
-
