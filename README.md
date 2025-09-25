@@ -2,7 +2,7 @@
 
 ## Project brief
 
-This project implements a **FIR filter bank** using a **systolic-array style architecture** implemented in Verilog and exercised on Colab using Icarus Verilog (`iverilog`) and Python-based verification/visualization. The goal is to show a hardware-friendly FIR bank design (many parallel FIR filters) built from a small, reusable **processing element (PE)** and to verify its correctness against a floating-point Python reference. FIR filters are widely used in digital signal processing (DSP) for applications such as audio enhancement, communication systems, biomedical signals, and more. Traditional FIR implementations often rely on direct-form architectures, which suffer from large propagation delays and inefficient hardware usage. By contrast, **systolic arrays** exploit parallelism and pipelining. They consist of interconnected processing elements (PEs) that work together in a rhythmic, "systolic" fashion similar to the pumping of blood in the human heart. This makes systolic arrays an excellent choice for high-performance and scalable FIR filter implementations.
+This project implements a **FIR filter bank** using a **systolic-array style architecture** implemented in Verilog and exercised on Colab using Icarus Verilog (`iverilog`) and Python-based verification/visualization. Along with functional simulation, we also perform a gate-level synthesis of the RTL codes using Yosys to generate a synthesized netlist and obtain basic resource statistics. The goal is to show a hardware-friendly FIR bank design (many parallel FIR filters) built from a small, reusable **processing element (PE)** and to verify its correctness against a floating-point Python reference. FIR filters are widely used in digital signal processing (DSP) for applications such as audio enhancement, communication systems, biomedical signals, and more. Traditional FIR implementations often rely on direct-form architectures, which suffer from large propagation delays and inefficient hardware usage. By contrast, **systolic arrays** exploit parallelism and pipelining. They consist of interconnected processing elements (PEs) that work together in a rhythmic, "systolic" fashion similar to the pumping of blood in the human heart. This makes systolic arrays an excellent choice for high-performance and scalable FIR filter implementations.
 
 ## FIR Filter Formula
 
@@ -32,8 +32,7 @@ Where:
 * A `topmodule` that instantiates `NUM_FILTERS` independent systolic chains in parallel; this is the FIR *bank*.
 * A Verilog testbench that feeds fixed-point input samples and filter coefficients (generated in Python) and writes per-cycle outputs to `output.txt`.
 * Python tools (in the notebook) to generate inputs/coefficients, run the simulator, read results, compute the floating-point reference with `np.convolve`, and visualize/compare results.
-
-> NOTE: This README intentionally omits the `yosys` (RTL-to-gate synthesis) section, per request.
+* In addition to simulation, **Yosys is used to synthesize the RTL into a gate-level netlist**, providing a quick check of synthesizability and a summary of hardware resources.
 
 ---
 
@@ -101,11 +100,17 @@ This section provides a complete overview of the entire project, presenting the 
    - These results are compared line by line with Verilog’s `output.txt`.  
    - Graphs of impulse responses, frequency responses, and time-domain outputs confirm that the Verilog and Python results match closely, apart from negligible quantization error.
 
-6. **Evolution of the Project**  
+6. **Gate-Level Synthesis using Yosys**  
+   After simulation, the same Verilog files are synthesized with **Yosys**.  
+   * Yosys reads the RTL (`block.v`, `systolic_array.v`, `topmodule.v`), sets the hierarchy, performs synthesis, and generates a gate-level netlist (`gate_level.v`).  
+   * A synthesis report shows resource counts such as adders, multipliers, and flip-flops.  
+   This step provides an early estimate of hardware usage and confirms that the design is ready for FPGA or ASIC flows.
+
+7. **Evolution of the Project**  
    Initially, the project was built manually for **3 filters × 3 taps** in a brute-force style. Now, the design is fully modular and scalable, capable of handling arbitrary numbers of taps, samples, and filters. By simply changing parameters in `defines.vh`, it works seamlessly for *x* taps, *y* filters, and *z* samples.
 
 **In summary**:  
-The project generates scaled inputs and coefficients (stored as hex), defines parameters centrally in `defines.vh`, runs a systolic-array FIR in Verilog, writes signed integer results to `output.txt`, and verifies them against Python with simulation and visualization. The final design is **accurate, modular, scalable, and efficient**.
+The project generates scaled inputs and coefficients (stored as hex), defines parameters centrally in `defines.vh`, runs a systolic-array FIR in Verilog, writes signed integer results to `output.txt`, and verifies them against Python with simulation and visualization, and finally synthesizes the RTL with Yosys to produce a gate-level netlist and resource report. The final design is **accurate, modular, scalable, and efficient**.
 
 ---
 
@@ -325,6 +330,51 @@ diff = expected_outputs - verilog_outputs
 
 ---
 
+### 7) `Gate-Level Synthesis with Yosys`
+
+This section installs **Yosys**, creates a small synthesis script, and runs it to generate a synthesized gate-level netlist of the FIR filter bank.
+
+**Commands used inside the script:**
+```bash
+# 1. Install Yosys
+sudo apt-get update
+sudo apt-get install -y yosys
+
+# 2. Download a generic standard cell library
+wget https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib -O nangate45.lib
+
+# 3. Run Yosys synthesis
+yosys -p '
+    read_verilog topmodule.v systolic_array.v block.v;  # Load all RTL source files
+    synth -top topmodule;                               # Perform generic synthesis
+    dfflibmap -liberty nangate45.lib;                  # Map flip-flops to library cells
+    abc -liberty nangate45.lib;                        # Map combinational logic to library cells
+    write_verilog -noattr synthesized_netlist.v;      # Write the synthesized gate-level netlist
+'
+
+# 4. (Optional) Preview the first 50 lines of the synthesized netlist
+head -n 50 synthesized_netlist.v
+```
+#### Explanation of Steps
+
+- **`read_verilog`** : Loads all Verilog RTL files into Yosys.   
+- **`synth -top`** : Runs the generic synthesis algorithm to convert RTL into gate-level logic.
+- **`dfflibmap -liberty`** : Maps flip-flops to the standard cells defined in the library.
+- **`abc -liberty`** : Maps combinational logic to standard cells using ABC.  
+- **`write_verilog -noattr`** : Outputs the final gate-level netlist as `synthesized_netlist.v`.  
+
+#### Output Files
+
+Running this flow produces the following files:
+
+- **`synthesized_netlist.v`** : The synthesized gate-level netlist of the design.
+- **`nangate45.lib`** : Standard cell library used for technology mapping.
+
+This confirms that the Verilog RTL is fully synthesizable and provides an early estimate of the hardware resources required for FPGA or ASIC implementation.
+
+---
+
+
 ## Result graphs : What the graphs show and how to interpret them
 
 This is a walk through of each type of plot the notebook generates and what to look for.
@@ -430,6 +480,7 @@ This project successfully demonstrates the **implementation of an FIR filter usi
 
 * Implemented a compact systolic-array FIR filter bank in Verilog, parameterized by number of filters and taps.
 * Verified the design with an automated flow (Python generates data, Verilog sim runs, Python verifies & visualizes).
+* Performed a gate-level synthesis of the RTL codes using Yosys to generate a netlist and basic resource report.
 * Demonstrated that systolic arrays give an elegant and scalable means to implement high-throughput FIR banks.
 
 The systolic array FIR filter proves to be a **highly efficient, scalable, and practical hardware-friendly solution** for modern digital signal processing applications.
